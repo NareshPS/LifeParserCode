@@ -10,6 +10,7 @@ Project Advisor :                Prof. Steven Skiena
 import MySQLdb
 import debugTrace
 import errorStrings
+import siteConfig
 
 class dbConnect:
 
@@ -25,7 +26,7 @@ class dbConnect:
     debugTraceInst              = None
     errorStringsInst            = None
 
-    def dbConnect(self, hostName, userName, password, defDB, debugEnabled = False):
+    def __init__(self, hostName, userName, password, defDB, debugEnabled = False):
         self.debugEnabled       = debugEnabled
         self.hostName           = hostName
         self.userName           = userName
@@ -58,14 +59,16 @@ class dbConnect:
 
     def fetchAllAccessTokens(self):
         
-        queryString = "select oauthToken, oauthSecret from records"
+        queryString = "select emailId, oauthToken, oauthSecret from records"
+        self.connCursor.execute(queryString)
 
         rows        = self.connCursor.fetchall ()
 
-        if row == None:
+        if rows == None:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getFailedRequestError())
         
         return rows
 
 if __name__ == '__main__':
-    print 'hi'
+    dbConn      = dbConnect(siteConfig.dbHost, siteConfig.dbUser, siteConfig.dbPass, siteConfig.dbName)
+    print dbConn.fetchAllAccessTokens()

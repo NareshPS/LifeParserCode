@@ -98,7 +98,8 @@ class fsDataStore:
             return None
         
         filePath                        = os.path.join(self.fsRoot, self.fsDataDir, fileName)
-        filePath                        = self.longPathPrefix + filePath  
+        #Enable for Windows
+        #filePath                        = self.longPathPrefix + filePath  
         
         if shouldAppend is True:
             #Open with append permissions

@@ -7,7 +7,7 @@ Date            :                Jan 17 2011
 Project Advisor :                Prof. Steven Skiena
 '''
 
-import config
+import siteConfig
 import xoauth
 import eMailService, eMailFetch, eMailParser
 import errorStrings, debugTrace
@@ -17,24 +17,22 @@ import os
 import dbConnect
 
 #These values are provided by the service provider when registering the application.
-consumerKey             = 'quine.algorithm.cs.sunysb.edu'
-consumerSecret          = 'XWegMGJIOcnVYaigti7kLw21'
 debugEnabled            = True
 fileSuffix              = '.lifelogger'
 
-def downloadFiles():
+def downloadFiles(emailId, accessTokenKey, accessTokenSecret):
     debugEnabled        = True
     gMailFetch          = None
     gMailService        = None
     gMailXOAuthString   = None
     gMailProtocol       = 'IMAP'
     gMailProvider       = 'GMAIL'
-    gMailRepoRoot       = '/home/naresh/LifeParser/Data/GMail_DataStore'
+    gMailRepoRoot       = siteConfig.repoRoot
     gMailRepoType       = 'FILE'
-    userIdentity        = config.user
+    userIdentity        = emailId
     
-    oAuthConsumer       = xoauth.OAuthEntity(consumerKey, consumerSecret)
-    oAuthAccess         = xoauth.OAuthEntity(config.access_token[ 'key' ], config.access_token[ 'secret' ])
+    oAuthConsumer       = xoauth.OAuthEntity(siteConfig.consumerKey, siteConfig.consumerSecret)
+    oAuthAccess         = xoauth.OAuthEntity(accessTokenKey, accessTokenSecret)
     
     gMailService        = eMailService.eMailService(userIdentity, oAuthConsumer, oAuthAccess, gMailProtocol, gMailProvider, debugEnabled)
     gMailXOAuthString   = gMailService.doGenerateXOAuthString()
@@ -58,7 +56,7 @@ def downloadFiles():
             Connect to DataStore.
         '''     
         gMailRepoInst.doConnectToDataStore()
-        gMailRepoInst.doSelectDataStore(config.user)
+        gMailRepoInst.doSelectDataStore(emailId)
         
         '''
             Fetch the mails. 
@@ -87,7 +85,7 @@ def downloadFiles():
                     mailHeader      = email.message_from_string(mailEntry[ 1 ])
                     messageId       = email.header.decode_header(mailHeader[ 'Message-ID' ])[ 0 ][ 0 ]
                     cleanMessageId  = gMailParserInst.doCleanupForFilename(messageId)
-                    entryName       = config.user + cleanMessageId + fileSuffix
+                    entryName       = emailId + cleanMessageId + fileSuffix
                     
                     #Transform the message into a storage format.
                     gMailRepoInst.doUpdateItem(entryName, gMailParserInst.getMessageAsList(mailEntry[ 1 ]))
@@ -101,6 +99,11 @@ def downloadFiles():
         debugTraceInst.doPrintTrace(errorStringsInst.getXOAuthStringNoneError())
         
 if __name__ == '__main__':
-#downloadFiles()
-    dbConn      = dbConnect.dbConnect(config.dbHost, config.dbUser, config.dbPass, config.dbName, True)
-    print dbConn.fetchUserAccessToken()
+    dbConn              = dbConnect.dbConnect(siteConfig.dbHost, siteConfig.dbUser, siteConfig.dbPass, siteConfig.dbName, True)
+    
+    userInfoList        = dbConn.fetchAllAccessTokens()
+
+    for userInfo in userInfoList:
+        downloadFiles(userInfo['emailId'], userInfo['oauthToken'], userInfo['oauthSecret'])
+        
+    dbConn.dbDisconnect()
