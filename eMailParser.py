@@ -16,7 +16,7 @@ class eMailParser:
     unwantedCharList                    = ['/', '<', '>']
     replacementChar                     = ' '
     headerSeparatorChar                 = ':'
-    headerNameRegEx                     = '[a-zA-Z,-]+:'
+    headerNameRegEx                     = '[a-zA-Z\-]+:'
     
     regExInst                           = None
 
@@ -40,12 +40,14 @@ class eMailParser:
         messageLines                    = stringMessage.splitlines()
         numLines                        = len(messageLines)
         outMessageLines                 = []
+        initMatchObj                    = self.regExInst.match(messageLines[0])
 
-        if messageLines and self.regExInst.match(messageLines[0]):
+        if messageLines and initMatchObj is not None and initMatchObj.start() is not None:
             outListIdx                  = 0
             for index in range(numLines):
                 if len(messageLines[index]) != 0:
-                    if self.regExInst.match(messageLines[index]):
+                    matchObj            = self.regExInst.match(messageLines[index])
+                    if matchObj is not None and matchObj.start() is not None:
                         outMessageLines.append(messageLines[index])
                         outListIdx      += 1
                     else:
@@ -53,7 +55,7 @@ class eMailParser:
 
         else:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getInvalidRequestError())
-
+        
         return outMessageLines
     
     def doConvertMessageToFileFormat(self, messageContents):
@@ -84,24 +86,21 @@ class eMailParser:
         messageDict                         = {}
 
         if messageContents:
-            print messageContents
             for entry in messageContents:
                 matchObj                    = self.regExInst.match(entry)
 
-                if matchObj:
-                    print entry,
-                    print ':',
-                    print matchObj.groups()
+                if matchObj is not None and matchObj.start() is not None and matchObj.start() == 0:
+                    keyName                 = entry[matchObj.start():matchObj.end()-1]
+
+                    if messageDict.has_key(keyName) is False:
+                        messageDict[keyName]    = []
+
+                    messageDict[keyName].append(entry[matchObj.end():])
                 else:
-                    print 'No MatchObj For:',
-                    print entry
-#if messageDict.has_key(data[0]) is False:
-#                   messageDict[data[0]]    = []
-               
-#                messageDict[data[0]].append(data[1])
+                    self.debugTraceInst.doPrintTrace(self.errorStringsInst.getInvalidRequestError()+':'+entry)
         else:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getInvalidRequestError())
-
+        
         return messageDict
     
     def doCleanupForFilename(self, fileName):

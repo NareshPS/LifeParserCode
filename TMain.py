@@ -114,9 +114,13 @@ def processEMails(emailId):
 
     itemList            = gMailRepoInst.doListItems()
 
-#for item in itemList:
-    print itemList[ 0 ]
-    gMailParserInst.getMessageAsDict(gMailRepoInst.doFetchItem(itemList[ 0 ]))
+    for item in itemList:
+        try:
+            msgHeader   = gMailParserInst.getMessageAsDict(gMailRepoInst.doFetchItem(item))
+            print msgHeader
+            print email.utils.parsedate_tz(msgHeader['Date'][0])
+        except:
+            pass
 
         
 if __name__ == '__main__':
