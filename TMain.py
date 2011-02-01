@@ -19,16 +19,17 @@ import dbConnect
 #These values are provided by the service provider when registering the application.
 debugEnabled            = True
 fileSuffix              = '.lifelogger'
+    
+gMailProtocol           = 'IMAP'
+gMailProvider           = 'GMAIL'
+gMailRepoRoot           = siteConfig.repoRoot
+gMailRepoType           = 'FILE'
+debugEnabled        = True
 
-def downloadFiles(emailId, accessTokenKey, accessTokenSecret):
-    debugEnabled        = True
+def downloadMails(emailId, accessTokenKey, accessTokenSecret):
     gMailFetch          = None
     gMailService        = None
     gMailXOAuthString   = None
-    gMailProtocol       = 'IMAP'
-    gMailProvider       = 'GMAIL'
-    gMailRepoRoot       = siteConfig.repoRoot
-    gMailRepoType       = 'FILE'
     userIdentity        = emailId
     
     oAuthConsumer       = xoauth.OAuthEntity(siteConfig.consumerKey, siteConfig.consumerSecret)
@@ -97,6 +98,26 @@ def downloadFiles(emailId, accessTokenKey, accessTokenSecret):
         
     else:
         debugTraceInst.doPrintTrace(errorStringsInst.getXOAuthStringNoneError())
+
+def processEMails(emailId):
+    '''
+        This function process eMails stored in the repository.
+    '''
+    gMailRepoInst       = repositoryIface.repositoryIface(gMailRepoType, gMailRepoRoot, debugEnabled)
+    gMailParserInst     = eMailParser.eMailParser() 
+        
+    '''
+        Connect to DataStore.
+    '''     
+    gMailRepoInst.doConnectToDataStore()
+    gMailRepoInst.doSelectDataStore(emailId)
+
+    itemList            = gMailRepoInst.doListItems()
+
+#for item in itemList:
+    print itemList[ 0 ]
+    gMailParserInst.getMessageAsDict(gMailRepoInst.doFetchItem(itemList[ 0 ]))
+
         
 if __name__ == '__main__':
     dbConn              = dbConnect.dbConnect(siteConfig.dbHost, siteConfig.dbUser, siteConfig.dbPass, siteConfig.dbName, True)
@@ -104,6 +125,7 @@ if __name__ == '__main__':
     userInfoList        = dbConn.fetchAllAccessTokens()
 
     for userInfo in userInfoList:
-        downloadFiles(userInfo['emailId'], userInfo['oauthToken'], userInfo['oauthSecret'])
+#downloadMails(userInfo['emailId'], userInfo['oauthToken'], userInfo['oauthSecret'])
+        processEMails(userInfo['emailId'])
         
     dbConn.dbDisconnect()

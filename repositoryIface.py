@@ -27,7 +27,7 @@ class repositoryIface:
     delimitChar                         = '|'
     
     dataStoreDict                       = {'FILE': [ fsDataStore, 'fsDataStore', {'CONNECT': 'doConnect', 'AUTH': 'doAuthenticate', 
-                                                       'LIST': 'doList', 'SELECT': 'doSelect', 'SEARCH': 'doSearch', 
+                                                       'LIST_STORES': 'doListStores', 'LIST_ITEMS': 'doListItems', 'SELECT': 'doSelect', 'SEARCH': 'doSearch', 
                                                        'FETCH': 'doFetch', 'UPDATE': 'doUpdate', 'DISC': 'doDisconnect'} ]}
     
     searchActionList                    = [ 'NEW', 'CONT' ]
@@ -75,13 +75,24 @@ class repositoryIface:
         else:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getNotConnectedError())
             
+
+    def doListStores(self):
+        
+        if self.dataStoreInst is None:
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getNotConnectedError())
+            return None
+        
+        listMethod                      = self.dataStoreDict[ self.dataStoreType ][ 2 ][ 'LIST_STORES' ]
+        
+        return getattr(self.dataStoreInst, listMethod)()
+        
     def doListItems(self):
         
         if self.dataStoreInst is None:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getNotConnectedError())
             return None
         
-        listMethod                      = self.dataStoreDict[ self.dataStoreType ][ 2 ][ 'LIST' ]
+        listMethod                      = self.dataStoreDict[ self.dataStoreType ][ 2 ][ 'LIST_ITEMS' ]
         
         return getattr(self.dataStoreInst, listMethod)()
         
@@ -113,9 +124,19 @@ class repositoryIface:
         retDict                         = {}
         
         for itemName in itemList:
-            retDict[ itemName ]         = getattr(self.dataStoreInst, fetchMethod)(itemName)
+            retDict[ itemName ]         = getattr(self.dataStoreInst, fetchMethod)(itemName, self.delimitChar)
             
         return retDict
+
+    def doFetchItem(self, itemName):
+        
+        if self.dataStoreInst is None:
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getNotConnectedError())
+            return None
+        
+        fetchMethod                     = self.dataStoreDict[ self.dataStoreType ][ 2 ][ 'FETCH' ]
+        
+        return eMailParser.eMailParser().doConvertFileFormatToMessage(getattr(self.dataStoreInst, fetchMethod)(itemName, self.delimitChar))
     
     def doSearchItems(self, pattern):
         

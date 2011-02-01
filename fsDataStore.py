@@ -42,7 +42,7 @@ class fsDataStore:
         
         self.fsRoot                     = None
         
-    def doList(self):
+    def doListStores(self):
         
         if self.fsDataDir is None:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getEarlyRequestError())
@@ -54,8 +54,28 @@ class fsDataStore:
         for item in pathInfo:
             if os.path.isdir(os.path.join(self.fsRoot, item)):
                 dirList.append(item)
- 
+
         return dirList
+
+    def doListItems(self):
+
+        if self.fsDataDir is None or self.fsDataDir is None:
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getEarlyRequestError())
+            return None
+
+        storePath                       = os.path.join(self.fsRoot, self.fsDataDir)
+        fileList                        = []
+
+        if os.path.exists(storePath):
+            itemList                    = os.listdir(storePath)
+        
+            for item in itemList:
+                if os.path.isdir(os.path.join(storePath, item)) is False:
+                    fileList.append(item)
+        else:
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getResourceNotFoundError())
+
+        return fileList
     
     def doSelect(self, dataDir):
         
@@ -65,7 +85,7 @@ class fsDataStore:
         if os.path.exists(fullPath) is False:
             os.mkdir(fullPath)
             
-    def doFetch(self, fileName):
+    def doFetch(self, fileName, delimitChar):
         
         if self.fsDataDir is None:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getEarlyRequestError())
@@ -76,10 +96,12 @@ class fsDataStore:
         if os.path.exists(filePath):
             #Read File If Exists
             fileHandle                  = open(filePath, 'r')
-            fileContents                = fileHandle.readlines()
+            fileContents                = fileHandle.readline()
             fileHandle.close()
-            
-            return fileContents
+
+            lines                       = fileContents.split(delimitChar);            
+            return lines
+
         else:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getResourceNotFoundError())
             
@@ -100,7 +122,7 @@ class fsDataStore:
         filePath                        = os.path.join(self.fsRoot, self.fsDataDir, fileName)
         #Enable for Windows
         #filePath                        = self.longPathPrefix + filePath  
-        
+
         if shouldAppend is True:
             #Open with append permissions
             fileHandle                  = open(filePath, 'a')
