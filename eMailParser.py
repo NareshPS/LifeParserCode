@@ -90,7 +90,7 @@ class eMailParser:
                 matchObj                    = self.regExInst.match(entry)
 
                 if matchObj is not None and matchObj.start() is not None and matchObj.start() == 0:
-                    keyName                 = entry[matchObj.start():matchObj.end()-1]
+                    keyName                 = entry[matchObj.start():matchObj.end()-1].lower()
 
                     if messageDict.has_key(keyName) is False:
                         messageDict[keyName]    = []

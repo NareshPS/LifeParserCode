@@ -36,8 +36,9 @@ class dbConnect:
         self.debugTraceInst     = debugTrace.debugTrace(self.debugEnabled)
         self.errorStringsInst   = errorStrings.errorStrings()
 
+    def dbConnect(self):
         try:
-            self.mySQLConn          = MySQLdb.connect(hostName, userName, password, defDB)
+            self.mySQLConn      = MySQLdb.connect(self.hostName, self.userName, self.password, self.defDB)
             self.connCursor     = self.mySQLConn.cursor (MySQLdb.cursors.DictCursor)
         except MySQLdb.Error, e:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getConnectionFailedError() + ':' + e.args[ 1 ])
@@ -49,7 +50,25 @@ class dbConnect:
     def fetchUserAccessToken(self, userName):
         
         queryString = "select oauthToken, oauthSecret from records where emailId='" + userName + "'"
+        self.connCursor.execute(queryString)
 
+        row         = self.connCursor.fetchone ()
+
+        if row == None:
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getFailedRequestError())
+
+        return row
+
+    def setProgressInfo(self, emailId, inProgress = False):
+       
+        queryString = "update records set fetchDate=current_date(), inProgress=" + str(inProgress) + " where emailId='" + emailId + "'"
+        self.connCursor.execute(queryString)
+
+    def getProgressInfo(self, emailId):
+       
+        queryString = "select fetchDate, inProgress from records where emailId='" + emailId + "'"
+        self.connCursor.execute(queryString)
+        
         row         = self.connCursor.fetchone ()
 
         if row == None:

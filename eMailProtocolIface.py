@@ -136,6 +136,7 @@ class eMailProtocolIface:
         if self.currentMsgIdList is None or searchAction == self.searchActionList[ 0 ]:         
             searchMethod                = self.pyModuleDict[ self.eMailProtocol ][ 1 ][ 'SEARCH' ]
             reqStatus, searchRes        = getattr(self.connectionHandle, searchMethod)(None, searchCrit)
+
             msgIdList                   = searchRes[ 0 ].split()            
             numMessages                 = len(msgIdList)
             self.currentMsgIdList       = (numMessages, msgIdList)
