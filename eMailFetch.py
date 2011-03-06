@@ -82,7 +82,7 @@ class eMailFetch:
         
         resultTuples                = []
         
-        for request in reqList:
+        for reqType in reqList:
             resultTuples.append(self.protocolIfaceInst.getMails(startIdx, mailCount, searchCrit, searchAction, self.getReqTypeFromFlags(reqType)))
             
         return resultTuples

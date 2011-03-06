@@ -50,7 +50,7 @@ class eMailService:
                                       None, None, None
                                       )
             
-            self.debugTraceInst.doPrintTrace('xoAuthString: ' + self.xoAuthString, True)
+#self.debugTraceInst.doPrintTrace('xoAuthString: ' + self.xoAuthString, True)
             return self.xoAuthString
         else:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getKeySecretMissingError())

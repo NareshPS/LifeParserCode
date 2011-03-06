@@ -23,6 +23,7 @@ class errorStrings:
     errorResourceNotFound           = 'Resource Not Found'
     errorFailedRequest              = 'Specified Request Failed'
     errorConnectionFailed           = 'Connection Failed'
+    errorDictKeyMissing             = 'Key Missing'
      
     def __init__(self):
         pass
@@ -65,3 +66,7 @@ class errorStrings:
 
     def getConnectionFailedError(self):
         return self.errorConnectionFailed
+
+    def getDictKeyMissingError(self):
+        return self.errorDictKeyMissing
+

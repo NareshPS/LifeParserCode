@@ -9,6 +9,8 @@ Project Advisor :                Prof. Steven Skiena
 
 import debugTrace, errorStrings
 import os
+import siteConfig
+import email
 
 class fsDataStore:
     '''
@@ -78,17 +80,26 @@ class fsDataStore:
         return fileList
     
     def doSelect(self, dataDir):
-        
-        self.fsDataDir                  = dataDir   
+
+        self.fsDataDir                  = dataDir
         fullPath                        = os.path.join(self.fsRoot, self.fsDataDir)
-        
+            
+        '''curUid                      = os.geteuid()
+        os.seteuid(siteConfig.siteUid)
+        print os.geteuid()
+        '''
         if os.path.exists(fullPath) is False:
             os.mkdir(fullPath)
+        '''
+        os.seteuid(curUid)
+        print os.geteuid()
+        '''
+
             
     def doFetch(self, fileName, delimitChar):
         
         if self.fsDataDir is None:
-            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getEarlyRequestError())
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getEarlyRequestError(), sys.exc_info()[2])
             return None
         
         filePath                        = os.path.join(self.fsRoot, self.fsDataDir, fileName)
@@ -96,14 +107,13 @@ class fsDataStore:
         if os.path.exists(filePath):
             #Read File If Exists
             fileHandle                  = open(filePath, 'r')
-            fileContents                = fileHandle.readline()
+            fileContents                = email.message_from_file(fileHandle);
             fileHandle.close()
 
-            lines                       = fileContents.split(delimitChar);            
-            return lines
+            return fileContents
 
         else:
-            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getResourceNotFoundError())
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getResourceNotFoundError(), sys.exc_info()[2])
             
         return None
     
@@ -120,20 +130,23 @@ class fsDataStore:
             return None
         
         filePath                        = os.path.join(self.fsRoot, self.fsDataDir, fileName)
+        fileHandle                      = None
         #Enable for Windows
-        #filePath                        = self.longPathPrefix + filePath  
-
-        if shouldAppend is True:
-            #Open with append permissions
-            fileHandle                  = open(filePath, 'a')
-        else:
-            #Create New File
-            fileHandle                      = open(filePath, 'w')
+        #filePath                        = self.longPathPrefix + filePath
         
-        for line in fileContents:
-            fileHandle.write(line)
-            fileHandle.write(delimitChar)
-            
+        try:
+            if shouldAppend is True:
+                #Open with append permissions
+                fileHandle                  = open(filePath, 'a')
+            else:
+                #Create New File 
+                fileHandle                      = open(filePath, 'w')
+           
+            for line in fileContents:
+                fileHandle.write(line)
+        except IOError, (errno, strerror):
+            self.debugTraceInst.doPrintTrace(self.errorStringsInst.getFailedRequestError()+'IOError: (%s): %s'%(errno, strerror))
+
         fileHandle.close()
             
         return None

@@ -10,6 +10,7 @@ Project Advisor :                Prof. Steven Skiena
 
 import debugTrace, errorStrings
 import re
+import email
 
 class eMailParser:
     
@@ -59,7 +60,8 @@ class eMailParser:
         return outMessageLines
     
     def doConvertMessageToFileFormat(self, messageContents):
-     
+    
+        return messageContents
         #Append the number of lines in the contents.
         newContents                     = []
         newContents.append(str(len(messageContents)))
@@ -71,20 +73,25 @@ class eMailParser:
 
     def doConvertFileFormatToMessage(self, fileContents):
         
-        if fileContents:
-            numLines                        = len(fileContents)
-            newContents                     = []
-        
-            for index in range(1, numLines):
-                if len(fileContents[ index ]) > 0:
-                    newContents.append(fileContents[ index ])
-            
-        return newContents
+        return fileContents
 
     def getMessageAsDict(self, messageContents):
 
         messageDict                         = {}
 
+        for key in messageContents.keys():
+            fixedKey                        = key.lower()
+            finalKey                        = fixedKey [0].upper() + fixedKey[1:len(fixedKey)]
+            messageDict [finalKey]          = messageContents.get_all(key)
+        
+        if messageContents.is_multipart() == True:
+            messageDict ['Payload']             = str((messageContents.get_payload()[0]).get_payload())
+        else:
+            messageDict ['Payload']             = messageContents.get_payload()
+        
+
+        '''
+        print messageContents
         if messageContents:
             for entry in messageContents:
                 matchObj                    = self.regExInst.match(entry)
@@ -100,7 +107,8 @@ class eMailParser:
                     self.debugTraceInst.doPrintTrace(self.errorStringsInst.getInvalidRequestError()+':'+entry)
         else:
             self.debugTraceInst.doPrintTrace(self.errorStringsInst.getInvalidRequestError())
-        
+        '''
+
         return messageDict
     
     def doCleanupForFilename(self, fileName):

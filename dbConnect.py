@@ -59,14 +59,14 @@ class dbConnect:
 
         return row
 
-    def setProgressInfo(self, emailId, inProgress = False):
+    def setProgressInfo(self, emailId, inProgress = False, progress = 0):
        
-        queryString = "update records set fetchDate=current_date(), inProgress=" + str(inProgress) + " where emailId='" + emailId + "'"
+        queryString = "update records set fetchDate=current_date(), inProgress=" + str(inProgress) + ", progress=" + str(progress) + " where emailId='" + emailId + "'"
         self.connCursor.execute(queryString)
 
     def getProgressInfo(self, emailId):
        
-        queryString = "select fetchDate, inProgress from records where emailId='" + emailId + "'"
+        queryString = "select fetchDate, inProgress, progress from records where emailId='" + emailId + "'"
         self.connCursor.execute(queryString)
         
         row         = self.connCursor.fetchone ()
