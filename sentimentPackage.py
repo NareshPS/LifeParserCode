@@ -46,6 +46,28 @@ class sentimentPackage:
     def constructRegEx(self, word):
         return r'\b' + word + r'\b'
 
+    def computeSentiment(self, message):
+        positiveSentiment           = 0
+        negativeSentiment           = 0
+        negativeWords               = []
+        positiveWords               = []
+
+        totalCount                  = len(message.split(' '))
+
+        for key in self.sentimentDict.keys():
+            wordCount               = self.countWords(key, message)
+
+            if self.sentimentDict [key][2] == -1:
+                negativeSentiment   += wordCount
+                if wordCount != 0:
+                    negativeWords.append(key)
+            else:
+                positiveSentiment   += wordCount
+                if wordCount != 0:
+                    positiveWords.append(key)
+
+        return (positiveSentiment, positiveWords, negativeSentiment, negativeWords, totalCount)
+
     def countWords(self, word, message):
         regEx                       = self.constructRegEx(word)
         regObj                      = re.compile(regEx)
@@ -57,21 +79,7 @@ class sentimentPackage:
         else:
             return 0
 
-    def computeSentiment(self, message):
-        
-        positiveSentiment           = 0
-        negativeSentiment           = 0
-
-        for key in self.sentimentDict.keys():
-            wordCount               = self.countWords(key, message)
-
-            if self.sentimentDict [key][2] == -1:
-                negativeSentiment   += wordCount
-            else:
-                positiveSentiment   += wordCount
-
-        return (positiveSentiment, negativeSentiment)
-
 if __name__ == "__main__":
     sent                = sentimentPackage(True)
+    dir(sent)
     print sent.computeSentiment("hi This is a test program xoxo")

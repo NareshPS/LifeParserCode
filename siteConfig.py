@@ -9,7 +9,7 @@ Project Advisor :                Prof. Steven Skiena
 
 dbHost                  = 'localhost'
 dbUser                  = 'root'
-dbPass                  = ''
+dbPass                  = 'passwd'
 dbName                  = 'gamut'
 
 debugEnabled            = True

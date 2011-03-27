@@ -74,11 +74,11 @@ class eMailProcessor:
         sentimentInst               = sentimentPackage.sentimentPackage(self.debugEnabled)
 
         itemList                    = repoInst.doListItems()
-        
         msgDict                     = mailParser.getMessageAsDict(repoInst.doFetchItem(itemList[0]))
 
         mailCount                   = len(itemList)
-
+        print mailCount
+        
         for item in itemList:
             print 'Remaining ' + str(mailCount)
             try:
@@ -87,7 +87,9 @@ class eMailProcessor:
                 commaIndex              = dirtyDate.find(',')
                 goodDate                = dirtyDate[:commaIndex].strip() + dirtyDate[commaIndex:]
                 sentimentValue          = sentimentInst.computeSentiment(msgDict ['Payload'])
-                self.dumpRequiredOutput(hSentFile, hRecvFile, emailId, email.utils.parsedate_tz(goodDate), msgDict, sentimentValue [0], sentimentValue [1])
+
+                if sentimentValue [4] != 0:
+                    self.dumpRequiredOutput(hSentFile, hRecvFile, emailId, email.utils.parsedate_tz(goodDate), msgDict, sentimentValue)
             except KeyError:
                self.debugTraceInst.doPrintTrace(errorStringsInst.getDictKeyMissingError(), sys.exc_info()[2])
 
@@ -96,24 +98,35 @@ class eMailProcessor:
         hSentFile.close()
         hRecvFile.close()
 
+    def serializeSentimentTuple(self, sentimentValue):
 
-    def dumpRequiredOutput(self, hSentFile, hRecvFile, emailId, dateTime, msgHeader, positiveSentiment, negativeSentiment):
+        mailParser                  = eMailParser.eMailParser() 
+        sentimentStr				= ','.join(sentimentValue [1]) + ','
+        positiveSentimentStr		= mailParser.doCleanupForFilename(sentimentStr)
+        sentimentStr				= ','.join(sentimentValue [3]) + ','
+        negativeSentimentStr		= mailParser.doCleanupForFilename(sentimentStr)
+
+        return str(sentimentValue [0]) + '\t' + positiveSentimentStr + '\t' + str(sentimentValue [2]) + '\t' + negativeSentimentStr + '\t' + str(sentimentValue [4])
+
+    def dumpRequiredOutput(self, hSentFile, hRecvFile, emailId, dateTime, msgHeader, sentimentValue):
         '''
             This function extracts the interesting data from the emails
             and dumps it to output file.
         '''
+        mailParser                  = eMailParser.eMailParser() 
         strDateTime                 = '%d/%d/%d\t%d:%d:%d'% (dateTime[1], dateTime[2], dateTime[0], dateTime[3], dateTime[4], dateTime[5])
+        strSubject                  = '\t' + mailParser.doCleanupForFilename(msgHeader ['Subject'][0])
         mailList                    = ''
 
         if msgHeader['From'][0].find(emailId) != -1:
             if msgHeader.has_key('To'):
                 toList                  = self.eMailRegExInst.findall(msgHeader['To'][0])
-                mailList                = '\t' + ' '.join(set(toList)) + '\t' + str(positiveSentiment) + '\t' + str(negativeSentiment)
+                mailList                = '\t' + ' '.join(set(toList)) + '\t' + self.serializeSentimentTuple(sentimentValue)
 
-            hSentFile.write(strDateTime + mailList + '\n') 
+            hSentFile.write(strDateTime + strSubject + mailList + '\n') 
         else:
             if msgHeader.has_key('From'):
                 fromList                = self.eMailRegExInst.findall(msgHeader['From'][0])
-                mailList                = '\t' + ' '.join(set(fromList)) + '\t' + str(positiveSentiment) + '\t' + str(negativeSentiment)
+                mailList                = '\t' + ' '.join(set(fromList)) + '\t' + self.serializeSentimentTuple(sentimentValue) 
 
-            hRecvFile.write(strDateTime + mailList + '\n')
+            hRecvFile.write(strDateTime + strSubject + mailList + '\n')

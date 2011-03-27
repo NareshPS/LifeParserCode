@@ -14,7 +14,7 @@ import email
 
 class eMailParser:
     
-    unwantedCharList                    = ['/', '<', '>']
+    unwantedCharList                    = ['/', '<', '>', '\t','\r','\n']
     replacementChar                     = ' '
     headerSeparatorChar                 = ':'
     headerNameRegEx                     = '[a-zA-Z\-]+:'

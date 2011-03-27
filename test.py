@@ -1,3 +1,4 @@
+# /usr/bin/python
 import imaplib
 import xoauth
 import siteConfig
@@ -8,4 +9,7 @@ oAuthAccess = xoauth.OAuthEntity('1/DJmkp2hONVLXF0-9ZESc9jzAJEA0dZmtqwxwIWo-EAM'
 oauthstr=xoauth.GenerateXOauthString(oAuthConsumer, oAuthAccess, 'mail2naresh@gmail.com', 'IMAP', None, None, None)
 conn.authenticate('XOAUTH', lambda x: oauthstr)
 conn.select('INBOX')
-conn.search(None, None)
+type, [msgids] = conn.search(None, 'ALL')
+msgids = ','.join(msgids.split(' '))
+type, resp = conn.fetch(msgids, '(BODY.PEEK[TEXT])')
+print resp
