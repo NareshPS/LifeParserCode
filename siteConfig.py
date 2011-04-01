@@ -14,11 +14,8 @@ dbName                  = 'gamut'
 
 debugEnabled            = True
 fileSuffix              = '.lifelogger'
-
-consumerKey             = 'quine.algorithm.cs.sunysb.edu'
-consumerSecret          = 'XWegMGJIOcnVYaigti7kLw21'
 programDir              = '/home/naresh/LifeParser/'
-repoRoot                = programDir + 'Data/GMail_DataStore'
+repoRoot                = programDir + 'Data/'
 analysisDir             = programDir + 'Analysis/'
 analysisSentSuffix      = '.sent'
 analysisRecvSuffix      = '.recv'

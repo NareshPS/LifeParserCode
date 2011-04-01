@@ -17,12 +17,13 @@ import os, sys, traceback
 import dbConnect
 import time
 import eMailProcessor
+import gMailConfig
 
 #These values are provided by the service provider when registering the application.
 gMailFetchDuration      = 24    
 gMailProtocol           = 'IMAP'
 gMailProvider           = 'GMAIL'
-gMailRepoRoot           = siteConfig.repoRoot
+gMailRepoRoot           = gMailConfig.gMailRepo
 gMailRepoType           = 'FILE'
 
 errorStringsInst    = errorStrings.errorStrings()
@@ -34,7 +35,7 @@ def downloadMails(emailId, accessTokenKey, accessTokenSecret, fetchDate):
     gMailXOAuthString   = None
     userIdentity        = emailId
     
-    oAuthConsumer       = xoauth.OAuthEntity(siteConfig.consumerKey, siteConfig.consumerSecret)
+    oAuthConsumer       = xoauth.OAuthEntity(gMailConfig.gMailConsumerKey, gMailConfig.gMailConsumerSecret)
     oAuthAccess         = xoauth.OAuthEntity(accessTokenKey, accessTokenSecret)
     
     gMailService        = eMailService.eMailService(userIdentity, oAuthConsumer, oAuthAccess, gMailProtocol, gMailProvider, siteConfig.debugEnabled)
