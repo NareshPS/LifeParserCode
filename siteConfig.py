@@ -15,6 +15,7 @@ dbName                  = 'gamut'
 debugEnabled            = True
 fileSuffix              = '.lifelogger'
 logFileDir              = programDir + 'Logs'
+
 programDir              = '/home/naresh/git/Naresh/LifeParser/'
 repoRoot                = programDir + 'Data/'
 analysisDir             = programDir + 'Analysis/'

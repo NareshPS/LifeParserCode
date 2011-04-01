@@ -1,5 +1,4 @@
 import daemon
-
 import time
 import glob
 import logging
