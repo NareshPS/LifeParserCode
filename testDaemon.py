@@ -4,6 +4,7 @@ import glob
 import logging
 import logging.handlers
 
+
 class LifeParserDaemon(daemon.Daemon):
     logger              = None
 
